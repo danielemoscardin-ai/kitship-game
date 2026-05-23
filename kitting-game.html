@@ -1,0 +1,521 @@
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:system-ui,sans-serif;background:#f0f2f5;color:#222;padding:12px;min-height:100vh;}
+.topbar{display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;align-items:center;}
+.stat{background:#fff;border:1px solid #ddd;border-radius:8px;padding:5px 12px;text-align:center;}
+.sl{font-size:9px;color:#888;text-transform:uppercase;letter-spacing:.04em;}
+.sv{font-size:18px;font-weight:700;}
+.red{color:#c0392b;}.green{color:#27ae60;}.blue{color:#2980b9;}
+.panel{background:#fff;border:1px solid #ddd;border-radius:8px;padding:10px 12px;margin-bottom:7px;}
+.ptitle{font-size:10px;color:#888;text-transform:uppercase;font-weight:700;letter-spacing:.05em;margin-bottom:7px;}
+.devs{display:flex;flex-wrap:wrap;gap:5px;}
+.db{background:#f8f8f8;border:2px solid #ddd;border-radius:7px;padding:6px 8px;cursor:pointer;text-align:center;min-width:72px;transition:border-color .1s,background .1s;}
+.db:hover{border-color:#2980b9;background:#eaf3fb;}
+.db:active{transform:scale(.93);}
+.di{font-size:18px;}.dn{font-size:10px;font-weight:700;margin-top:2px;}.ds{font-size:9px;color:#888;}.dq{font-size:9px;color:#aaa;}
+.staging{display:flex;flex-wrap:wrap;gap:4px;min-height:32px;margin-bottom:7px;}
+.chip{background:#d6eaf8;border:1px solid #85c1e9;border-radius:20px;padding:3px 9px;font-size:11px;color:#1a5276;cursor:pointer;}
+.chip:hover{background:#aed6f1;}
+.btns{display:flex;gap:5px;flex-wrap:wrap;}
+.btn{border:none;border-radius:7px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;}
+.btn:active{transform:scale(.97);}
+.bb{background:#2980b9;color:#fff;}.bb:hover{background:#1a5276;}
+.bg{background:#27ae60;color:#fff;}.bg:hover{background:#1e8449;}
+.br{background:#c0392b;color:#fff;}
+.bo{background:#e67e22;color:#fff;}
+.bgr{background:#ddd;color:#444;}
+.steps{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px;}
+.step{font-size:10px;padding:3px 9px;border-radius:20px;border:1px solid #ccc;color:#888;background:#f5f5f5;}
+.step.active{background:#2980b9;color:#fff;border-color:#2980b9;}
+.step.done{background:#27ae60;color:#fff;border-color:#27ae60;}
+.step.warn{background:#e67e22;color:#fff;border-color:#e67e22;}
+.kp{background:#eaf3fb;border:1px solid #85c1e9;border-radius:6px;padding:4px 9px;margin:2px 0;}
+.kp.ok{background:#eafaf1;border-color:#82e0aa;color:#1e8449;}
+.kpn{font-size:11px;font-weight:700;}.kph{font-size:9px;color:#888;}
+.kp.ok .kph{color:#1e8449;}
+.qci{display:flex;align-items:center;gap:7px;padding:5px 7px;border:1px solid #ddd;border-radius:6px;margin-bottom:4px;font-size:12px;}
+.qci.ck{background:#eafaf1;border-color:#27ae60;color:#1e8449;}
+.qci input{width:14px;height:14px;cursor:pointer;accent-color:#27ae60;}
+.lrow{display:flex;align-items:center;gap:7px;margin-bottom:6px;}
+.lrow label{font-size:11px;color:#555;min-width:68px;}
+.lrow input,.lrow select{flex:1;padding:5px 7px;border:1px solid #ccc;border-radius:5px;font-size:12px;}
+.log{max-height:70px;overflow-y:auto;}
+.li{font-size:10px;padding:2px 6px;border-left:3px solid #ccc;margin-bottom:2px;border-radius:0 3px 3px 0;}
+.lok{border-color:#27ae60;background:#eafaf1;color:#1e8449;}
+.ler{border-color:#c0392b;background:#fdedec;color:#922b21;}
+.lsh{border-color:#2980b9;background:#eaf3fb;color:#1a5276;}
+.lwn{border-color:#e67e22;background:#fef9e7;color:#9a6010;}
+.lsp{border-color:#8e44ad;background:#f5eef8;color:#6c3483;}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:50;align-items:center;justify-content:center;}
+.overlay.on{display:flex;}
+.obox{background:#fff;border-radius:12px;padding:20px;max-width:320px;width:90%;text-align:center;}
+.obox h2{font-size:16px;margin-bottom:6px;}
+.big{font-size:44px;font-weight:700;color:#2980b9;margin:8px 0;}
+.penbox{background:#fff;border-radius:12px;padding:20px;max-width:320px;width:90%;text-align:center;}
+.penbox h2{color:#c0392b;font-size:15px;margin-bottom:6px;}
+.pent{font-size:40px;font-weight:700;color:#c0392b;}
+#start{background:#fff;border-radius:10px;padding:20px;margin-bottom:8px;}
+.rules{background:#f8f9fa;border:1px solid #e0e0e0;border-radius:8px;padding:12px 14px;margin:12px 0;text-align:left;}
+.rules-row{display:flex;align-items:flex-start;gap:8px;margin-bottom:7px;font-size:12px;line-height:1.5;color:#444;}
+.rules-row:last-child{margin-bottom:0;}
+.rules-row .num{background:#2980b9;color:#fff;border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;margin-top:1px;}
+.tip{background:#fff8e1;border:1px solid #ffe082;border-radius:7px;padding:9px 12px;font-size:11px;color:#7a5c00;margin-bottom:12px;line-height:1.5;text-align:left;}
+.drow{display:flex;gap:6px;justify-content:center;margin-bottom:14px;}
+.dopt{border:2px solid #ccc;border-radius:7px;padding:6px 14px;cursor:pointer;font-size:12px;font-weight:700;background:#fff;}
+.dopt.sel{border-color:#2980b9;background:#eaf3fb;color:#1a5276;}
+.name-input{width:100%;padding:10px 14px;font-size:15px;border:2px solid #ccc;border-radius:8px;margin-bottom:14px;text-align:center;}
+.name-input:focus{outline:none;border-color:#2980b9;}
+</style>
+
+<div id="start">
+  <div style="font-size:32px;text-align:center;margin-bottom:6px">📦</div>
+  <h2 style="font-size:18px;font-weight:700;text-align:center;margin-bottom:4px">Kit & Ship Pro</h2>
+  <p style="font-size:12px;color:#888;text-align:center;margin-bottom:10px">How fast can you kit and ship to patients?</p>
+
+  <div style="text-align:center;margin-bottom:4px;font-size:12px;font-weight:700;color:#444;">Your name</div>
+  <input class="name-input" id="playername" placeholder="Enter your name..." maxlength="30">
+
+  <div class="rules">
+    <div class="rules-row"><div class="num">1</div><div><b>Assemble the kit</b> — read the required parameters and pick the right devices. Items turn green when covered.</div></div>
+    <div class="rules-row"><div class="num">2</div><div><b>Quality check</b> — tick all QC items before moving on. You can skip it to save time… but it's risky! 😬</div></div>
+    <div class="rules-row"><div class="num">3</div><div><b>Print label</b> — fill in patient name, city, courier and priority.</div></div>
+    <div class="rules-row"><div class="num">4</div><div><b>Ship it!</b> — confirm and the kit is on its way. Build your streak for max score!</div></div>
+  </div>
+
+  <div class="tip">💡 <b>Pro tip:</b> You can skip the QC to go faster — but watch out! If a patient's device malfunctions, you'll get blocked for several seconds on a support call. Your call 😄</div>
+
+  <div class="drow">
+    <div class="dopt sel" id="de" onclick="sd('easy',this)">🟢 Easy</div>
+    <div class="dopt" id="dn" onclick="sd('normal',this)">🟡 Normal</div>
+    <div class="dopt" id="dh" onclick="sd('hard',this)">🔴 Hard</div>
+  </div>
+  <div style="text-align:center">
+    <button class="btn bb" style="font-size:15px;padding:11px 36px" onclick="startGame()">▶ START</button>
+  </div>
+</div>
+
+<div id="gs" style="display:none">
+  <div class="topbar">
+    <div style="font-size:13px;font-weight:700;flex:1">Kit & Ship Pro — <span id="pname" style="color:#2980b9"></span></div>
+    <div class="stat"><div class="sl">Timer</div><div class="sv red" id="tv">2:00</div></div>
+    <div class="stat"><div class="sl">Shipped</div><div class="sv green" id="sv2">0</div></div>
+    <div class="stat"><div class="sl">Errors</div><div class="sv red" id="ev">0</div></div>
+    <div class="stat"><div class="sl">Streak</div><div class="sv blue" id="stv">0🔥</div></div>
+  </div>
+  <div class="steps">
+    <div class="step active" id="s1">1·Kit</div>
+    <span style="color:#aaa;font-size:11px">→</span>
+    <div class="step" id="s2">2·QC</div>
+    <span style="color:#aaa;font-size:11px">→</span>
+    <div class="step" id="s3">3·Label</div>
+    <span style="color:#aaa;font-size:11px">→</span>
+    <div class="step" id="s4">4·Ship</div>
+  </div>
+  <div class="panel">
+    <div class="ptitle">Patient order <span id="knum">#1</span> — required parameters</div>
+    <div id="kparams"></div>
+  </div>
+
+  <div id="phkit">
+    <div class="panel">
+      <div class="ptitle">Devices — click to add to kit</div>
+      <div class="devs" id="devgrid"></div>
+    </div>
+    <div class="panel">
+      <div class="ptitle">Kit staging — click chip to remove</div>
+      <div class="staging" id="stg"></div>
+      <div class="btns">
+        <button class="btn bb" onclick="confirmKit()">✔ Confirm kit</button>
+        <button class="btn bgr" onclick="clearStg()">✕ Clear</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="phqc" style="display:none">
+    <div class="panel">
+      <div class="ptitle">Quality check — tick all items</div>
+      <div id="qclist"></div>
+      <div class="btns" style="margin-top:7px">
+        <button class="btn bg" onclick="confirmQC()">✔ QC passed</button>
+        <button class="btn bo" onclick="skipQC()">⚠ Skip QC (risky!)</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="phlabel" style="display:none">
+    <div class="panel">
+      <div class="ptitle">Shipping label</div>
+      <div class="lrow"><label>Patient</label><input id="lp" placeholder="Patient name..." autocomplete="off"></div>
+      <div class="lrow"><label>City</label><input id="lc" placeholder="City..."></div>
+      <div class="lrow"><label>Courier</label>
+        <select id="lco"><option value="">— select —</option><option>BRT</option><option>DHL</option><option>GLS</option><option>SDA</option></select>
+      </div>
+      <div class="lrow"><label>Priority</label>
+        <select id="lpr"><option value="">— select —</option><option>Standard</option><option>Express</option><option>Same day</option></select>
+      </div>
+      <div class="btns" style="margin-top:8px">
+        <button class="btn bb" onclick="confirmLabel()">🏷 Print label</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="phship" style="display:none">
+    <div class="panel">
+      <div class="ptitle">Ready to ship</div>
+      <div id="shipinfo" style="font-size:12px;line-height:1.8;color:#444;margin-bottom:9px;"></div>
+      <button class="btn bg" style="font-size:14px;padding:9px 22px" onclick="doShip()">📦 SHIP IT!</button>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="ptitle">Log</div>
+    <div class="log" id="log"></div>
+  </div>
+</div>
+
+<div class="overlay" id="pen">
+  <div class="penbox">
+    <div style="font-size:28px;margin-bottom:6px">🚨</div>
+    <h2>Patient support call!</h2>
+    <div style="background:#fff3cd;border:1px solid #ffc107;border-radius:7px;padding:8px 10px;font-size:12px;color:#856404;margin-bottom:8px;line-height:1.5;">
+      <b>You skipped the QC</b> — a patient's device is not sending data correctly and they need help right now.
+    </div>
+    <div id="penmsg" style="font-size:12px;color:#555;margin:6px 0 10px;line-height:1.5;font-style:italic;"></div>
+    <div class="pent" id="pent">5</div>
+    <div style="font-size:10px;color:#aaa;margin-top:4px">seconds blocked — always do the QC next time! 😅</div>
+  </div>
+</div>
+
+<div class="overlay" id="end">
+  <div class="obox">
+    <div style="font-size:28px" id="eemoji">🏆</div>
+    <h2 id="etitle">Time's up!</h2>
+    <div class="big" id="escore">0</div>
+    <div style="font-size:11px;color:#888;margin-bottom:4px" id="esub"></div>
+    <div id="sending-msg" style="font-size:11px;color:#2980b9;margin-bottom:10px">📡 Saving score to leaderboard...</div>
+    <button class="btn bb" style="width:100%;margin-bottom:6px;font-size:14px" onclick="restart()">▶ Play again</button>
+    <button class="btn bgr" style="width:100%;font-size:13px" onclick="copyScore()">📋 Copy score for Slack</button>
+    <div id="cmsg" style="font-size:11px;color:#27ae60;margin-top:5px;display:none">✅ Copied!</div>
+  </div>
+</div>
+
+<script>
+var SCRIPT_URL='https://script.google.com/macros/s/AKfycbx19zkaZ4vB-MkS6CKxpr-QoB4VbabnqK4LVY3kEuUw3WEehk_ExyimnYmr3yWjGM4-pA/exec';
+
+var DEVS=[
+  {id:'armfit',   n:'ArmFit',     ic:'💪', sb:'ECG · BP',       px:['ecg','bp']},
+  {id:'duoek',    n:'DuoEK-S',    ic:'❤️', sb:'ECG',            px:['ecg']},
+  {id:'xcheck',   n:'X-CheckPro', ic:'🩸', sb:'Blood pressure', px:['bp']},
+  {id:'smarttemp',n:'Smart-Temp', ic:'🌡️', sb:'Temperature',   px:['temp']},
+  {id:'oxy8',     n:'Oxy8',       ic:'🫁', sb:'SpO2',           px:['spo2']},
+  {id:'omron',    n:'Omron Viva', ic:'⚖️', sb:'Weight · BMI',  px:['peso','bmi']},
+  {id:'quadrant', n:'Quadrant',   ic:'👟', sb:'Steps',          px:['steps']},
+  {id:'gw',       n:'Gateway',    ic:'📡', sb:'Connectivity',   px:['gw']},
+  {id:'tablet',   n:'Tablet',     ic:'📱', sb:'Interface',      px:['tablet']},
+  {id:'charger',  n:'Charger',    ic:'🔌', sb:'Accessory',      px:['charger']},
+  {id:'bag',      n:'Kit bag',    ic:'🎒', sb:'Container',      px:['bag']},
+];
+var PARAMS={
+  ecg:{lbl:'ECG',ok:['armfit','duoek']},
+  bp:{lbl:'Blood pressure',ok:['armfit','xcheck']},
+  temp:{lbl:'Body temperature',ok:['smarttemp']},
+  spo2:{lbl:'SpO2 / Saturation',ok:['oxy8']},
+  peso:{lbl:'Weight + BMI',ok:['omron']},
+  bmi:{lbl:'BMI',ok:['omron']},
+  steps:{lbl:'Steps / Activity',ok:['quadrant']},
+  gw:{lbl:'Gateway',ok:['gw']},
+  tablet:{lbl:'Tablet',ok:['tablet']},
+  charger:{lbl:'Charger',ok:['charger']},
+  bag:{lbl:'Kit bag',ok:['bag']},
+};
+var KITS=[
+  ['ecg','charger','gw','bag'],
+  ['bp','charger','gw','bag'],
+  ['spo2','charger'],
+  ['temp','charger'],
+  ['ecg','spo2','charger','gw','bag'],
+  ['ecg','bp','charger','gw','bag'],
+  ['spo2','temp','charger','gw','bag'],
+  ['bp','spo2','charger'],
+  ['ecg','peso','charger','gw','bag'],
+  ['steps','temp','charger'],
+  ['ecg','bp','spo2','charger','gw','bag'],
+  ['ecg','bp','spo2','temp','charger','gw','bag'],
+  ['bp','spo2','peso','charger','gw','bag'],
+  ['ecg','temp','steps','charger','gw','bag'],
+];
+var QCS=[
+  'Devices powered on and working',
+  'Bluetooth pairing verified',
+  'Firmware up to date',
+  'Battery ≥ 80%',
+  'Sensors clean and intact',
+  'All accessories included',
+  'Calibration verified',
+  'Data transmission test OK',
+  'Gateway / SIM connected',
+  'Documentation included',
+];
+var PENS=[
+  '"My device won\'t turn on!" — Mr. Rossi has called 3 times. Dead battery, not checked.',
+  '"The gateway is offline!" — Ms. Bianchi can\'t sync. Pairing was never tested.',
+  'Platform alert: no data from patient Verdi. Sensor was not paired before shipping.',
+  'Humanitas doctor reports corrupted ECG data. Firmware was not updated.',
+  '"The scale always shows zero!" — Ms. Ferrari. Calibration check was skipped.',
+];
+var diff='easy', G={};
+
+function sd(d,el){
+  diff=d;
+  ['de','dn','dh'].forEach(function(id){document.getElementById(id).classList.remove('sel');});
+  el.classList.add('sel');
+}
+function shuf(a){var b=a.slice();for(var i=b.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=b[i];b[i]=b[j];b[j]=t;}return b;}
+function pick(a){return a[Math.floor(Math.random()*a.length)];}
+
+function startGame(){
+  var pname=document.getElementById('playername').value.trim();
+  if(!pname){alert('Enter your name to start!');return;}
+  var secs=diff==='hard'?90:diff==='normal'?110:120;
+  G={run:true,secs:secs,score:0,err:0,streak:0,maxStreak:0,stg:[],phase:'kit',kidx:0,
+     queue:shuf(KITS.concat(shuf(KITS))),qcDone:false,qcSkip:false,skipTot:0,
+     label:{},penActive:false,iv:null,qcItems:[],lastPatient:'',player:pname};
+  document.getElementById('start').style.display='none';
+  document.getElementById('gs').style.display='block';
+  document.getElementById('pname').textContent=pname;
+  document.getElementById('end').classList.remove('on');
+  document.getElementById('pen').classList.remove('on');
+  document.getElementById('log').innerHTML='';
+  buildDevGrid();
+  nextKit();
+  G.iv=setInterval(tick,1000);
+}
+
+function restart(){
+  clearInterval(G.iv);
+  document.getElementById('end').classList.remove('on');
+  document.getElementById('gs').style.display='none';
+  document.getElementById('start').style.display='block';
+}
+
+function tick(){
+  if(G.penActive)return;
+  G.secs--;
+  var m=Math.floor(G.secs/60),s=G.secs%60;
+  document.getElementById('tv').textContent=m+':'+(s<10?'0':'')+s;
+  if(G.secs<=0)endGame();
+}
+
+function endGame(){
+  clearInterval(G.iv);G.run=false;
+  var e=G.score>=10?'🏆':G.score>=6?'🎯':G.score>=3?'👍':'😅';
+  var t=G.score>=10?'Legendary!':G.score>=6?'Great job!':G.score>=3?'Good try!':'Keep practicing!';
+  document.getElementById('eemoji').textContent=e;
+  document.getElementById('etitle').textContent=t;
+  document.getElementById('escore').textContent=G.score;
+  document.getElementById('esub').textContent=G.player+' · '+diff.toUpperCase()+' · Errors: '+G.err+' · QC skipped: '+G.skipTot+' · Max streak: '+G.maxStreak+'🔥';
+  document.getElementById('sending-msg').textContent='📡 Saving score to leaderboard...';
+  document.getElementById('end').classList.add('on');
+  sendScore();
+}
+
+function sendScore(){
+  var payload={
+    player:G.player,
+    score:G.score,
+    difficulty:diff,
+    errors:G.err,
+    qcSkipped:G.skipTot,
+    maxStreak:G.maxStreak
+  };
+  fetch(SCRIPT_URL,{
+    method:'POST',
+    mode:'no-cors',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(payload)
+  }).then(function(){
+    document.getElementById('sending-msg').textContent='✅ Score saved to leaderboard!';
+  }).catch(function(){
+    document.getElementById('sending-msg').textContent='⚠ Could not save score (offline?)';
+  });
+}
+
+function copyScore(){
+  var t='📦 Kit & Ship Pro — '+diff.toUpperCase()+'\n👤 Player: '+G.player+'\n🚀 Shipped: '+G.score+' kits\n❌ Errors: '+G.err+' · ⚠ QC skipped: '+G.skipTot+'\n🔥 Max streak: '+G.maxStreak+'\n\nCan you beat me? 💪';
+  navigator.clipboard.writeText(t).then(function(){document.getElementById('cmsg').style.display='block';});
+}
+
+function nextKit(){
+  G.stg=[];G.qcDone=false;G.qcSkip=false;G.label={};G.qcItems=[];
+  G.curKit=G.queue[G.kidx%G.queue.length];G.kidx++;
+  document.getElementById('knum').textContent='#'+G.kidx;
+  document.getElementById('lp').value='';
+  renderKitParams();renderStg();setPhase('kit');
+}
+
+function setPhase(ph){
+  G.phase=ph;
+  document.getElementById('phkit').style.display=ph==='kit'?'block':'none';
+  document.getElementById('phqc').style.display=ph==='qc'?'block':'none';
+  document.getElementById('phlabel').style.display=ph==='label'?'block':'none';
+  document.getElementById('phship').style.display=ph==='ship'?'block':'none';
+  var order=['kit','qc','label','ship'];
+  var labels=['1·Kit','2·QC','3·Label','4·Ship'];
+  var cur=order.indexOf(ph);
+  for(var i=0;i<4;i++){
+    var el=document.getElementById('s'+(i+1));
+    el.textContent=labels[i];
+    el.className='step'+(i<cur?' done':i===cur?' active':'');
+  }
+  if(ph==='qc')buildQC();
+  if(ph==='ship')buildShipInfo();
+}
+
+function renderKitParams(){
+  var el=document.getElementById('kparams');el.innerHTML='';
+  G.curKit.forEach(function(pid){
+    var p=PARAMS[pid];
+    var d=document.createElement('div');
+    d.className='kp';d.id='kp-'+pid;
+    var hint=p.ok.map(function(id){return DEVS.find(function(d){return d.id===id;}).n;}).join(' / ');
+    d.innerHTML='<div class="kpn">'+p.lbl+'</div><div class="kph">device: '+hint+'</div>';
+    el.appendChild(d);
+  });
+}
+
+function buildDevGrid(){
+  var el=document.getElementById('devgrid');el.innerHTML='';
+  DEVS.forEach(function(dev){
+    var b=document.createElement('div');
+    b.className='db';b.id='db-'+dev.id;
+    b.onclick=(function(id){return function(){addDev(id);};})(dev.id);
+    b.innerHTML='<div class="di">'+dev.ic+'</div><div class="dn">'+dev.n+'</div><div class="ds">'+dev.sb+'</div><div class="dq" id="dq-'+dev.id+'">×0</div>';
+    el.appendChild(b);
+  });
+}
+
+function addDev(id){
+  if(!G.run||G.phase!=='kit')return;
+  G.stg.push(id);renderStg();updateKitVis();
+}
+function clearStg(){G.stg=[];renderStg();updateKitVis();}
+
+function renderStg(){
+  var el=document.getElementById('stg');el.innerHTML='';
+  var cnt={};G.stg.forEach(function(id){cnt[id]=(cnt[id]||0)+1;});
+  DEVS.forEach(function(dev){
+    if(cnt[dev.id]){
+      var c=document.createElement('div');c.className='chip';
+      c.textContent=dev.ic+' '+dev.n+(cnt[dev.id]>1?' ×'+cnt[dev.id]:'')+' ✕';
+      c.onclick=(function(id){return function(){var l=G.stg.slice();var f=l.lastIndexOf(id);if(f!==-1)l.splice(f,1);G.stg=l;renderStg();updateKitVis();};})(dev.id);
+      el.appendChild(c);
+    }
+  });
+  DEVS.forEach(function(dev){var q=document.getElementById('dq-'+dev.id);if(q)q.textContent='×'+(cnt[dev.id]||0);});
+}
+
+function updateKitVis(){
+  var cnt={};G.stg.forEach(function(id){cnt[id]=(cnt[id]||0)+1;});
+  G.curKit.forEach(function(pid){
+    var el=document.getElementById('kp-'+pid);if(!el)return;
+    var ok=PARAMS[pid].ok.some(function(vid){return cnt[vid]>0;});
+    el.className='kp'+(ok?' ok':'');
+  });
+}
+
+function confirmKit(){
+  if(!G.run)return;
+  var cnt={};G.stg.forEach(function(id){cnt[id]=(cnt[id]||0)+1;});
+  var miss=[];
+  G.curKit.forEach(function(pid){
+    if(!PARAMS[pid].ok.some(function(vid){return cnt[vid]>0;}))miss.push(PARAMS[pid].lbl);
+  });
+  if(miss.length){addLog('Incomplete kit — missing: '+miss.join(', '),'er');G.err++;upStats();return;}
+  addLog('✅ Kit assembled — time for QC!','ok');setPhase('qc');
+}
+
+function buildQC(){
+  var n=diff==='easy'?3:diff==='normal'?4:5;
+  var items=shuf(QCS).slice(0,n);
+  G.qcItems=items.map(function(l){return{lbl:l,chk:false};});
+  var el=document.getElementById('qclist');el.innerHTML='';
+  G.qcItems.forEach(function(item,i){
+    var d=document.createElement('div');d.className='qci';d.id='qi-'+i;
+    d.innerHTML='<input type="checkbox" id="qc'+i+'" onchange="tgQC('+i+',this.checked)"><label for="qc'+i+'" style="cursor:pointer;flex:1">'+item.lbl+'</label>';
+    el.appendChild(d);
+  });
+}
+
+function tgQC(i,v){G.qcItems[i].chk=v;document.getElementById('qi-'+i).className='qci'+(v?' ck':'');}
+
+function confirmQC(){
+  if(!G.qcItems.every(function(i){return i.chk;})){addLog('Tick all QC items first!','er');G.err++;upStats();return;}
+  G.qcDone=true;addLog('✅ QC passed — print the label','ok');setPhase('label');
+}
+
+function skipQC(){
+  G.qcSkip=true;G.skipTot++;
+  addLog('⚠ QC skipped — risk of support penalty!','wn');
+  document.getElementById('s2').className='step warn';
+  document.getElementById('s2').textContent='2·QC ⚠';
+  setPhase('label');
+}
+
+function confirmLabel(){
+  var p=document.getElementById('lp').value.trim();
+  var c=document.getElementById('lc').value.trim();
+  var co=document.getElementById('lco').value;
+  var pr=document.getElementById('lpr').value;
+  if(!p){addLog('Enter patient name!','er');G.err++;upStats();return;}
+  if(!c||!co||!pr){addLog('Fill in all label fields!','er');G.err++;upStats();return;}
+  if(p.toLowerCase()===G.lastPatient.toLowerCase()){addLog('Patient name must be different from last one!','er');G.err++;upStats();return;}
+  G.label={p:p,c:c,co:co,pr:pr};G.lastPatient=p;
+  addLog('🏷 Label: '+p+' → '+c+' ('+co+' '+pr+')','ok');setPhase('ship');
+}
+
+function buildShipInfo(){
+  var l=G.label;
+  var devs=[...new Set(G.stg)].map(function(id){return DEVS.find(function(d){return d.id===id;}).n;}).join(', ');
+  document.getElementById('shipinfo').innerHTML='<b>Patient:</b> '+l.p+'<br><b>City:</b> '+l.c+'<br><b>Courier:</b> '+l.co+' ('+l.pr+')<br><b>Devices:</b> '+devs+'<br><b>QC:</b> '+(G.qcDone?'✅ Passed':'⚠️ Skipped');
+}
+
+function doShip(){
+  if(!G.run)return;
+  if(G.qcSkip&&Math.random()<0.65){triggerPenalty();return;}
+  ship();
+}
+
+function ship(){
+  G.score++;G.streak++;if(G.streak>G.maxStreak)G.maxStreak=G.streak;
+  addLog('📦 Shipped to '+G.label.p+' ('+G.label.c+') — Streak '+G.streak+'🔥','sh');
+  upStats();nextKit();
+}
+
+function triggerPenalty(){
+  var msg=pick(PENS);
+  var secs=diff==='easy'?5:diff==='normal'?8:12;
+  document.getElementById('penmsg').textContent=msg;
+  document.getElementById('pent').textContent=secs;
+  document.getElementById('pen').classList.add('on');
+  G.penActive=true;
+  addLog('🚨 PENALTY: '+secs+'s blocked — patient support call!','sp');
+  var iv2=setInterval(function(){
+    secs--;document.getElementById('pent').textContent=secs;
+    if(secs<=0){clearInterval(iv2);G.penActive=false;document.getElementById('pen').classList.remove('on');G.qcSkip=false;ship();}
+  },1000);
+}
+
+function upStats(){
+  document.getElementById('sv2').textContent=G.score;
+  document.getElementById('ev').textContent=G.err;
+  document.getElementById('stv').textContent=G.streak+'🔥';
+}
+
+function addLog(msg,type){
+  var el=document.getElementById('log');
+  var d=document.createElement('div');
+  d.className='li l'+type;d.textContent=msg;
+  el.insertBefore(d,el.firstChild);
+  if(el.children.length>20)el.removeChild(el.lastChild);
+}
+</script>
