@@ -1,0 +1,144 @@
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:system-ui,sans-serif;background:#f0f2f5;color:#222;padding:16px;}
+h1{font-size:20px;font-weight:700;margin-bottom:4px;}
+.sub{font-size:12px;color:#888;margin-bottom:16px;}
+.cards{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;}
+.card{background:#fff;border:1px solid #ddd;border-radius:10px;padding:14px 18px;min-width:130px;text-align:center;}
+.card-l{font-size:10px;color:#888;text-transform:uppercase;letter-spacing:.05em;}
+.card-v{font-size:28px;font-weight:700;color:#2980b9;margin-top:2px;}
+.card-v.green{color:#27ae60;}.card-v.red{color:#c0392b;}
+table{width:100%;border-collapse:collapse;background:#fff;border-radius:10px;overflow:hidden;border:1px solid #ddd;}
+th{background:#2980b9;color:#fff;padding:8px 12px;font-size:11px;text-align:left;text-transform:uppercase;letter-spacing:.04em;}
+td{padding:8px 12px;font-size:12px;border-bottom:1px solid #f0f0f0;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:#f8f8f8;}
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;}
+.easy{background:#eafaf1;color:#1e8449;}.normal{background:#fef9e7;color:#9a6010;}.hard{background:#fdedec;color:#922b21;}
+.btn{border:none;border-radius:7px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;background:#2980b9;color:#fff;margin-bottom:12px;}
+.btn:hover{background:#1a5276;}
+#status{font-size:12px;color:#888;margin-bottom:10px;padding:6px 10px;background:#fff;border-radius:7px;border:1px solid #ddd;display:inline-block;}
+.section-title{font-size:13px;font-weight:700;color:#444;margin:16px 0 8px;}
+.bar-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+.bar-name{font-size:11px;min-width:90px;color:#444;font-weight:600;}
+.bar-bg{flex:1;background:#f0f0f0;border-radius:4px;height:22px;}
+.bar-fill{background:#2980b9;border-radius:4px;height:22px;display:flex;align-items:center;padding-left:8px;font-size:11px;color:#fff;font-weight:700;min-width:30px;transition:width .6s;}
+.bar-runs{font-size:10px;color:#888;min-width:55px;}
+.empty{text-align:center;padding:24px;color:#aaa;font-size:13px;}
+</style>
+
+<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
+  <div>
+    <h1>📦 Kit & Ship — Dashboard</h1>
+    <div class="sub">I tuoi risultati in tempo reale</div>
+  </div>
+  <button class="btn" onclick="loadData()">🔄 Refresh</button>
+</div>
+
+<div id="status">⏳ Loading...</div>
+
+<div class="cards" id="cards"></div>
+
+<div class="section-title">🏆 Leaderboard — Best score per player</div>
+<div id="leaderboard-wrap"><div class="empty">No data yet</div></div>
+
+<div class="section-title">📊 All runs</div>
+<div style="overflow-x:auto">
+  <table>
+    <thead><tr><th>#</th><th>Time</th><th>Player</th><th>Score</th><th>Difficulty</th><th>Errors</th><th>QC Skipped</th><th>Max Streak</th></tr></thead>
+    <tbody id="runs-body"><tr><td colspan="8" class="empty">No data yet — play a game first!</td></tr></tbody>
+  </table>
+</div>
+
+<script>
+var CSV_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vR7QLIG9i4zEPq-FgqmNQATR5PCo5ujKHR5X8Ps0p-vrvoSHZTNFJMhTqaIev0xXIcBcm-v_Oupv4oM/pub?gid=0&single=true&output=csv';
+
+function parseCSV(text){
+  var lines=text.trim().split('\n');
+  if(lines.length<2)return[];
+  var rows=[];
+  for(var i=1;i<lines.length;i++){
+    var cols=lines[i].split(',');
+    if(cols.length>=7&&cols[1]){
+      rows.push({
+        timestamp:cols[0].trim(),
+        player:cols[1].trim(),
+        score:parseInt(cols[2])||0,
+        difficulty:(cols[3]||'').trim(),
+        errors:parseInt(cols[4])||0,
+        qcSkipped:parseInt(cols[5])||0,
+        maxStreak:parseInt(cols[6])||0
+      });
+    }
+  }
+  return rows;
+}
+
+function loadData(){
+  document.getElementById('status').textContent='⏳ Loading...';
+  fetch(CSV_URL+'&t='+Date.now())
+    .then(function(r){return r.text();})
+    .then(function(text){
+      var data=parseCSV(text);
+      document.getElementById('status').textContent='✅ Updated: '+new Date().toLocaleTimeString('it-IT')+' · '+data.length+' runs';
+      renderDashboard(data);
+    })
+    .catch(function(e){
+      document.getElementById('status').textContent='⚠ Error loading data';
+      console.error(e);
+    });
+}
+
+function renderDashboard(data){
+  if(!data||data.length===0){
+    document.getElementById('cards').innerHTML='<p style="color:#aaa;font-size:13px;padding:8px 0">No runs yet — play a game first!</p>';
+    document.getElementById('leaderboard-wrap').innerHTML='<div class="empty">No data yet</div>';
+    document.getElementById('runs-body').innerHTML='<tr><td colspan="8" class="empty">No data yet</td></tr>';
+    return;
+  }
+
+  var totalRuns=data.length;
+  var totalShipped=data.reduce(function(s,r){return s+r.score;},0);
+  var avgScore=Math.round(totalShipped/totalRuns);
+  var totalQCSkipped=data.reduce(function(s,r){return s+r.qcSkipped;},0);
+  var bestScore=Math.max.apply(null,data.map(function(r){return r.score;}));
+  var players=[...new Set(data.map(function(r){return r.player;}))].length;
+
+  document.getElementById('cards').innerHTML=
+    '<div class="card"><div class="card-l">Total runs</div><div class="card-v">'+totalRuns+'</div></div>'+
+    '<div class="card"><div class="card-l">Players</div><div class="card-v green">'+players+'</div></div>'+
+    '<div class="card"><div class="card-l">Best score</div><div class="card-v">'+bestScore+'</div></div>'+
+    '<div class="card"><div class="card-l">Avg score</div><div class="card-v">'+avgScore+'</div></div>'+
+    '<div class="card"><div class="card-l">QC skipped</div><div class="card-v red">'+totalQCSkipped+'</div></div>'+
+    '<div class="card"><div class="card-l">Total shipped</div><div class="card-v green">'+totalShipped+'</div></div>';
+
+  var best={};
+  data.forEach(function(r){
+    if(!best[r.player]||r.score>best[r.player].score){
+      best[r.player]={score:r.score,diff:r.difficulty,runs:0};
+    }
+  });
+  data.forEach(function(r){if(best[r.player])best[r.player].runs++;});
+  var lb=Object.keys(best).map(function(p){return{player:p,score:best[p].score,diff:best[p].diff,runs:best[p].runs};});
+  lb.sort(function(a,b){return b.score-a.score;});
+  var maxScore=lb[0]?lb[0].score:1;
+
+  var lbHtml='';
+  lb.forEach(function(row,i){
+    var pct=Math.max(Math.round((row.score/maxScore)*100),8);
+    var medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':'  ';
+    lbHtml+='<div class="bar-row"><div class="bar-name">'+medal+' '+row.player+'</div><div class="bar-bg"><div class="bar-fill" style="width:'+pct+'%">'+row.score+'</div></div><div class="bar-runs">'+row.runs+' run'+(row.runs>1?'s':'')+'</div></div>';
+  });
+  document.getElementById('leaderboard-wrap').innerHTML=lbHtml;
+
+  var sorted=data.slice().reverse();
+  var tbody='';
+  sorted.forEach(function(r,i){
+    var diff=r.difficulty.toLowerCase();
+    tbody+='<tr><td>'+(i+1)+'</td><td style="white-space:nowrap">'+r.timestamp+'</td><td><b>'+r.player+'</b></td><td><b>'+r.score+'</b></td><td><span class="badge '+diff+'">'+diff.toUpperCase()+'</span></td><td>'+r.errors+'</td><td>'+(r.qcSkipped>0?'<span style="color:#c0392b">⚠ '+r.qcSkipped+'</span>':'✅ 0')+'</td><td>'+r.maxStreak+'🔥</td></tr>';
+  });
+  document.getElementById('runs-body').innerHTML=tbody;
+}
+
+loadData();
+</script>
